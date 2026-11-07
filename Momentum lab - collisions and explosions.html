@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Momentum lab: collisions and explosions | Aquila IGCSE Physics</title>
+<style>
+:root{
+  --ink:#1c2b36; --muted:#5b6b76; --blue:#1F5F8B; --blueL:#e6f0f7; --blueM:#2F6FA3;
+  --orange:#E8692B; --orangeL:#fff1e8; --green:#2e7d32; --greenL:#e8f5e9; --red:#c62828; --redL:#fdecea;
+  --line:#d5dde3; --bg:#f5f8fa; --card:#ffffff;
+}
+*{box-sizing:border-box}
+html{font-size:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Lato,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.45}
+header{background:var(--blue);color:#fff;padding:18px 20px 0}
+header .wrap{max-width:1040px;margin:0 auto}
+header h1{margin:0 0 2px;font-size:1.6rem;font-weight:800}
+header p{margin:0 0 12px;opacity:.92;font-size:.95rem}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tabs button{border:0;background:rgba(255,255,255,.16);color:#fff;padding:10px 16px;border-radius:10px 10px 0 0;font:inherit;font-weight:700;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--bg);color:var(--blue)}
+.tabs button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+main{max-width:1040px;margin:0 auto;padding:18px 16px 40px}
+section[role="tabpanel"]{display:none}
+section[role="tabpanel"].on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+h2{margin:0 0 8px;font-size:1.25rem;color:var(--blue)}
+h3{margin:14px 0 6px;font-size:1.05rem;color:var(--blue)}
+.lead{color:var(--muted);margin:0 0 10px}
+canvas{width:100%;display:block;border-radius:10px;border:1px solid var(--line);background:#eaf4fb}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px 18px;margin:12px 0}
+.ctl label{display:flex;justify-content:space-between;font-weight:700;font-size:.92rem;margin-bottom:2px}
+.ctl label span.val{font-variant-numeric:tabular-nums;color:var(--blue)}
+.ctl.b label span.val{color:var(--orange)}
+input[type=range]{width:100%;accent-color:var(--blue)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+button.btn{font:inherit;font-weight:700;border:2px solid var(--blue);background:var(--blue);color:#fff;border-radius:10px;padding:8px 16px;cursor:pointer}
+button.btn.alt{background:#fff;color:var(--blue)}
+button.btn.org{background:var(--orange);border-color:var(--orange)}
+button.btn:disabled{opacity:.45;cursor:not-allowed}
+button.chip{font:inherit;font-size:.88rem;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;cursor:pointer}
+button.chip:hover{border-color:var(--blue);background:var(--blueL)}
+.seg{display:inline-flex;border:2px solid var(--blue);border-radius:10px;overflow:hidden}
+.seg button{font:inherit;font-weight:700;border:0;background:#fff;color:var(--blue);padding:7px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--blue);color:#fff}
+.note{background:var(--blueL);border-left:4px solid var(--blue);padding:8px 12px;border-radius:6px;font-size:.93rem;margin:8px 0}
+.warn{background:var(--orangeL);border-left:4px solid var(--orange)}
+.eq{font-size:1.5rem;font-weight:800;color:var(--blue);text-align:center;padding:10px;background:var(--blueL);border-radius:10px;font-variant-numeric:tabular-nums}
+.eq small{display:block;font-size:.9rem;color:var(--muted);font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:.93rem;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:center}
+th{background:var(--blue);color:#fff}
+td.l,th.l{text-align:left}
+tr.tot td{background:var(--blueL);font-weight:800}
+.tbl{overflow-x:auto}
+.two>*,.card{min-width:0}
+.cA{color:var(--blueM);font-weight:800}.cB{color:var(--orange);font-weight:800}
+.bars{display:grid;grid-template-columns:110px 1fr;gap:6px 10px;align-items:center;margin-top:8px;font-size:.9rem}
+.bar{position:relative;height:22px;background:#f0f3f5;border-radius:6px}
+.bar::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;background:#9aa7b0}
+.bar i{position:absolute;top:3px;bottom:3px;border-radius:4px;transition:all .15s}
+.status{font-weight:700;margin:6px 0;min-height:1.4em}
+.ok{color:var(--green)}.bad{color:var(--red)}
+.fb{padding:8px 12px;border-radius:8px;margin-top:8px;font-weight:700}
+.fb.ok{background:var(--greenL);color:var(--green)}
+.fb.bad{background:var(--redL);color:var(--red)}
+.fb.info{background:var(--blueL);color:var(--blue)}
+.work{background:#fafcfd;border:1px dashed var(--line);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:.95rem}
+.work ol{margin:4px 0 0 18px;padding:0}
+.chal{list-style:none;margin:0;padding:0}
+.chal li{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;background:#fff}
+.chal li.done{background:var(--greenL);border-color:#a5d6a7}
+.chal .tick{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:800;color:#fff;flex:none}
+.chal li.done .tick{background:var(--green);border-color:var(--green)}
+.num{width:130px;font:inherit;padding:7px 10px;border:2px solid var(--line);border-radius:8px;font-variant-numeric:tabular-nums}
+.q{font-size:1.1rem;font-weight:700;margin:6px 0 10px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:10px;align-items:center;text-align:left;font:inherit;border:2px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--blue);background:var(--blueL)}
+.opt b{width:26px;height:26px;flex:none;border-radius:50%;background:var(--blueL);color:var(--blue);display:grid;place-items:center}
+.opt.right{border-color:var(--green);background:var(--greenL)}
+.opt.wrong{border-color:var(--red);background:var(--redL)}
+.opt:disabled{cursor:default;color:var(--ink)}
+.prog{height:8px;border-radius:6px;background:#e3eaef;overflow:hidden;margin:6px 0 10px}
+.prog i{display:block;height:100%;background:var(--orange);width:0;transition:width .25s}
+.score{font-size:2.2rem;font-weight:800;color:var(--blue)}
+footer{max-width:1040px;margin:0 auto;padding:0 16px 30px;color:var(--muted);font-size:.85rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.two{grid-template-columns:1fr}header h1{font-size:1.3rem}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Momentum lab: collisions and explosions</h1>
+  <p>The Aquila School | IGCSE Physics | Chapter 3: Momentum and forces</p>
+  <div class="tabs" role="tablist" aria-label="Activities">
+    <button role="tab" id="t1" aria-selected="true" aria-controls="p1">1. Explore momentum</button>
+    <button role="tab" id="t2" aria-selected="false" aria-controls="p2">2. Collision lab</button>
+    <button role="tab" id="t3" aria-selected="false" aria-controls="p3">3. Calculate</button>
+    <button role="tab" id="t4" aria-selected="false" aria-controls="p4">4. Quiz</button>
+    <button role="tab" id="t5" aria-selected="false" aria-controls="p5">5. My report</button>
+  </div>
+</div></header>
+
+<main>
+<!-- ===================== 1. EXPLORE ===================== -->
+<section role="tabpanel" id="p1" class="on" aria-labelledby="t1">
+  <div class="card">
+    <h2>What affects momentum?</h2>
+    <p class="lead">Momentum = mass × velocity. Change the mass and the velocity and watch the momentum arrow. Right is positive (+). Left is negative (−).</p>
+    <div class="row"><span style="font-weight:700">Show as:</span>
+      <div class="seg" role="group" aria-label="Vehicle style"><button data-style="car" data-scope="x" aria-pressed="true">Car</button><button data-style="block" data-scope="x" aria-pressed="false">Block</button></div>
+    </div>
+    <canvas id="cvX" height="200" aria-label="A vehicle moving along a road with an arrow showing its momentum"></canvas>
+    <div class="controls">
+      <div class="ctl"><label for="xm">Mass <span class="val" id="xmv"></span></label><input type="range" id="xm" min="0.5" max="10" step="0.5" value="2"></div>
+      <div class="ctl"><label for="xv">Velocity <span class="val" id="xvv"></span></label><input type="range" id="xv" min="-8" max="8" step="0.5" value="3"></div>
+    </div>
+    <div class="eq" id="xeq" aria-live="polite"></div>
+    <div class="bars" id="xbars"></div>
+  </div>
+  <div class="card">
+    <h2>Challenges</h2>
+    <p class="lead">Use the sliders to meet each goal. A tick appears when you get it right.</p>
+    <ul class="chal" id="chal"></ul>
+    <div class="note">Think: what happens to the momentum when the velocity is zero? What does a negative momentum tell you?</div>
+  </div>
+</section>
+
+<!-- ===================== 2. LAB ===================== -->
+<section role="tabpanel" id="p2" aria-labelledby="t2">
+  <div class="card">
+    <h2>Collision lab</h2>
+    <p class="lead">Set up a collision or an explosion. <b>Predict first</b>, then press Run to test your prediction. Right is positive (+), left is negative (−).</p>
+    <div class="row"><span style="font-weight:700">Try an example:</span>
+      <button class="chip" data-preset="same1">Same direction: A catches B</button>
+      <button class="chip" data-preset="same2">Same direction: B at rest</button>
+      <button class="chip" data-preset="opp1">Opposite directions</button>
+      <button class="chip" data-preset="opp2">Equal and opposite</button>
+      <button class="chip" data-preset="bounce">Bounce apart</button>
+      <button class="chip" data-preset="exp1">Explosion: equal masses</button>
+      <button class="chip" data-preset="exp2">Explosion: unequal masses</button>
+    </div>
+    <div class="row">
+      <span style="font-weight:700">Event:</span>
+      <div class="seg" role="group" aria-label="Event type" id="modeSeg">
+        <button data-mode="stick" aria-pressed="true">Stick together</button>
+        <button data-mode="bounce" aria-pressed="false">Bounce</button>
+        <button data-mode="explode" aria-pressed="false">Explosion</button>
+      </div>
+      <span style="font-weight:700;margin-left:8px">Show as:</span>
+      <div class="seg" role="group" aria-label="Vehicle style"><button data-style="car" data-scope="lab" aria-pressed="true">Cars</button><button data-style="block" data-scope="lab" aria-pressed="false">Blocks</button></div>
+    </div>
+    <canvas id="cvL" height="250" aria-label="Two vehicles about to collide or explode, with momentum arrows"></canvas>
+    <div class="controls" id="labCtl">
+      <div class="ctl"><label for="mA"><span class="cA">A: mass</span> <span class="val" id="mAv"></span></label><input type="range" id="mA" min="0.5" max="10" step="0.5" value="3"></div>
+      <div class="ctl" id="vAwrap"><label for="vA"><span class="cA">A: velocity</span> <span class="val" id="vAv"></span></label><input type="range" id="vA" min="-8" max="8" step="0.5" value="4"></div>
+      <div class="ctl b"><label for="mB"><span class="cB">B: mass</span> <span class="val" id="mBv"></span></label><input type="range" id="mB" min="0.5" max="10" step="0.5" value="3"></div>
+      <div class="ctl b" id="vBwrap"><label for="vB"><span class="cB">B: velocity</span> <span class="val" id="vBv"></span></label><input type="range" id="vB" min="-8" max="8" step="0.5" value="0"></div>
+      <div class="ctl" id="uwrap" style="display:none"><label for="uu">Speed of A after the push (to the left) <span class="val" id="uuv"></span></label><input type="range" id="uu" min="0.5" max="6" step="0.5" value="3"></div>
+      <div class="ctl"><label for="spd">Playback speed <span class="val" id="spdv"></span></label><input type="range" id="spd" min="0.25" max="1" step="0.25" value="1"></div>
+    </div>
+    <div class="row">
+      <button class="btn org" id="run">Run</button>
+      <button class="btn alt" id="pause">Pause</button>
+      <button class="btn alt" id="reset">Reset</button>
+    </div>
+    <div class="status" id="labStatus" aria-live="polite"></div>
+  </div>
+
+  <div class="two">
+    <div class="card">
+      <h2>Momentum before and after</h2>
+      <div class="tbl"><table id="labTbl"></table></div>
+      <div class="status" id="consLine" aria-live="polite"></div>
+      <div class="bars" id="lbars"></div>
+    </div>
+    <div class="card">
+      <h2>Your prediction</h2>
+      <p class="lead" id="askLbl"></p>
+      <div class="row"><input class="num" id="askIn" type="text" inputmode="decimal" aria-label="Your prediction"> <span id="askUnit"></span>
+        <button class="btn" id="askBtn">Check</button></div>
+      <div id="askFb" aria-live="polite"></div>
+      <div class="row"><button class="btn alt" id="workBtn">Show working</button></div>
+      <div class="work" id="workBox" style="display:none"></div>
+      <div class="note warn" id="extNote" style="display:none"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 3. CALCULATE ===================== -->
+<section role="tabpanel" id="p3" aria-labelledby="t3">
+  <div class="card">
+    <h2>Calculate it</h2>
+    <p class="lead">Choose a question type. Work it out on paper using the equation, then type your answer. Take right as positive.</p>
+    <div class="row" id="qTypes"></div>
+    <div class="note" id="qEq"></div>
+    <div class="q" id="qText"></div>
+    <div class="row"><input class="num" id="qIn" type="text" inputmode="decimal" aria-label="Your answer"> <span id="qUnit"></span>
+      <button class="btn" id="qCheck">Check</button>
+      <button class="btn alt" id="qHint">Hint</button>
+      <button class="btn alt" id="qSteps">Show working</button>
+      <button class="btn alt" id="qNew">New question</button>
+      <button class="btn alt" id="qLab" style="display:none">Watch it in the lab</button>
+    </div>
+    <div id="qFb" aria-live="polite"></div>
+    <div class="work" id="qWork" style="display:none"></div>
+  </div>
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><div><b>Your score:</b> <span id="sc">0</span> correct out of <span id="st">0</span> attempts</div><div><b>Streak:</b> <span id="sk">0</span></div></div>
+    <div class="prog" aria-hidden="true"><i id="scBar"></i></div>
+  </div>
+</section>
+
+<!-- ===================== 4. QUIZ ===================== -->
+<section role="tabpanel" id="p4" aria-labelledby="t4">
+  <div class="card" id="quizCard"></div>
+</section>
+<!-- ===================== 5. REPORT ===================== -->
+<section role="tabpanel" id="p5" aria-labelledby="t5">
+  <div class="card">
+    <h2>My completion report</h2>
+    <p class="lead">Work through the four activities. Then type your name and download a PDF report to hand in or email to your teacher.</p>
+    <div class="controls">
+      <div class="ctl"><label for="repName">Your name</label><input class="num" style="width:100%" id="repName" type="text" autocomplete="name" placeholder="First and last name"></div>
+      <div class="ctl"><label for="repClass">Class</label><input class="num" style="width:100%" id="repClass" type="text" placeholder="e.g. 10B"></div>
+    </div>
+    <div id="repSummary"></div>
+    <div class="row"><button class="btn org" id="repBtn">Download PDF report</button></div>
+    <div id="repMsg" aria-live="polite"></div>
+    <div class="note">The report is made on your own device from what you did on this page. Nothing is sent anywhere. It shows what you completed, not a secure test result.</div>
+  </div>
+</section>
+</main>
+<footer>Original diagrams drawn for this activity. Content follows Chapter 3 of Oxford International AQA IGCSE Physics. Prepared by Mr. Christopher Roche, Head of Science, The Aquila School.</footer>
+
+<script>
+/* MiniPDF: tiny dependency-free PDF writer (Helvetica, Latin text, wrapping, tables, bars). Works offline. */
+function MiniPDF(){
+  const PW=595.28, PH=841.89, M=46, CW=PW-2*M, BOT=M+22;
+  const HW=[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
+  const BW=[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584];
+  const MAP={'−':'-','–':'\x96','—':'\x97','‘':'\x91','’':'\x92','“':'\x93','”':'\x94','•':'\x95','…':'\x85','✓':'Yes','✗':'No','→':'->','≈':'~','Δ':'delta ','²':'\xb2','³':'\xb3','×':'\xd7','÷':'\xf7','°':'\xb0','·':'\xb7','₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9','θ':'theta','π':'pi','≤':'<=','≥':'>=','½':'\xbd','¼':'\xbc','★':'*','☆':'-','−':'-','\u00a0':' ',' ':' '};
+  function enc(s){ let o=''; for(const ch of String(s)){ if(MAP[ch]!==undefined) o+=MAP[ch]; else { const c=ch.charCodeAt(0); o+=(c<256&&!(c>=127&&c<=159))?ch:'?'; } } return o; }
+  function esc(s){ return s.replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)'); }
+  function tw(s,size,bold){ const t=bold?BW:HW; let x=0; for(const ch of s){ const c=ch.charCodeAt(0); x+=(c>=32&&c<=126)?t[c-32]:556; } return x*size/1000; }
+  function wrap(s,width,size,bold){
+    s=enc(s); const out=[];
+    for(const para of s.split('\n')){
+      const words=para.split(/ +/); let line='';
+      for(const wd of words){
+        const t=line?line+' '+wd:wd;
+        if(tw(t,size,bold)<=width||!line) line=t; else { out.push(line); line=wd; }
+      }
+      out.push(line);
+    }
+    return out;
+  }
+  const pages=[]; let cur=null, y=0; let LOGO=null;
+  const col=c=>c.map(v=>(v/255).toFixed(3)).join(' ');
+  function newPage(){ cur=[]; pages.push(cur); y=PH-M; }
+  function put(s){ cur.push(s); }
+  function drawText(x,yb,s,size,bold,color){ put(`BT /${bold?'F2':'F1'} ${size} Tf ${col(color||[0,0,0])} rg ${x.toFixed(2)} ${yb.toFixed(2)} Td (${esc(s)}) Tj ET`); }
+  function need(h){ if(!cur||y-h<BOT) newPage(); }
+  const api={
+    CW, M,
+    setLogo(l){ LOGO=l; },
+    logoHeader(w){ if(!LOGO) return; const h=w*LOGO.h/LOGO.w; y-=h; put(`q ${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${M} ${y.toFixed(2)} cm /Im1 Do Q`); y-=6; },
+    yPos(){ return y; },
+    newPage,
+    gap(h){ y-=h; },
+    rect(x,top,w,h,fill,stroke,lw){
+      let op=''; if(fill){ op+=col(fill)+' rg '; } if(stroke){ op+=col(stroke)+' RG '+(lw||0.6)+' w '; }
+      put(`${op}${x.toFixed(2)} ${(top-h).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re ${fill&&stroke?'B':fill?'f':'S'}`);
+    },
+    text(s,o){ o=o||{}; const size=o.size||10, bold=!!o.bold, x=(o.x!==undefined?o.x:M)+(o.indent||0), width=(o.width||CW)-(o.indent||0);
+      const lines=wrap(s,width,size,bold), lh=size*1.32;
+      for(const ln of lines){ need(lh); y-=lh; let xx=x; if(o.align==='right') xx=x+width-tw(ln,size,bold); else if(o.align==='center') xx=x+(width-tw(ln,size,bold))/2; drawText(xx,y+size*0.25,ln,size,bold,o.color); }
+      y-=(o.after!==undefined?o.after:4);
+    },
+    h1(s){ api.text(s,{size:20,bold:true,color:[47,107,151],after:2}); },
+    h2(s){ need(40); y-=6; api.text(s,{size:13,bold:true,color:[47,107,151],after:3}); put(`${col([213,221,227])} RG 0.8 w ${M} ${(y+1).toFixed(2)} m ${(M+CW).toFixed(2)} ${(y+1).toFixed(2)} l S`); y-=4; },
+    kv(k,v){ need(16); const lh=13.5; y-=lh; drawText(M,y+3,enc(k),10,true,[91,107,118]); const lines=wrap(v,CW-130,10,false); drawText(M+130,y+3,lines[0]||'',10,false); for(let i=1;i<lines.length;i++){ need(lh); y-=lh; drawText(M+130,y+3,lines[i],10,false);} y-=1; },
+    bar(label,frac,right){ need(24); frac=Math.max(0,Math.min(1,frac)); const lh=12; y-=lh; drawText(M,y+3,enc(label),10,false); if(right) drawText(M+CW-tw(enc(right),10,true),y+3,enc(right),10,true,[47,107,151]); y-=5; api.rect(M,y,CW,7,[230,236,240]); if(frac>0) api.rect(M,y,CW*frac,7,frac>=1?[46,125,50]:[232,105,43]); y-=9; },
+    table(header,rows,widths,o){
+      o=o||{}; const size=o.size||9, pad=4, lh=size*1.3; const tot=widths.reduce((a,b)=>a+b,0); widths=widths.map(v=>v/tot*CW);
+      const drawRow=(cells,head,shade,colors)=>{
+        const L=cells.map((c,i)=>wrap(String(c),widths[i]-2*pad,size,head||(o.boldFirst&&i===0)));
+        const n=Math.max(...L.map(a=>a.length)), h=n*lh+2*pad; need(h+2);
+        let x=M; const top=y;
+        for(let i=0;i<cells.length;i++){
+          api.rect(x,top,widths[i],h,head?[47,107,151]:(shade?[238,246,250]:[255,255,255]),[213,221,227],0.5);
+          const colr=head?[255,255,255]:(colors&&colors[i])||[28,43,54];
+          L[i].forEach((ln,k)=>drawText(x+pad,top-pad-(k+1)*lh+size*0.3+1,ln,size,head||(o.boldFirst&&i===0)||(colors&&colors[i]&&o.boldColored),colr));
+          x+=widths[i];
+        }
+        y=top-h;
+      };
+      drawRow(header,true);
+      rows.forEach((r,i)=>{ const cells=r.cells||r; drawRow(cells,false,i%2===1,r.colors); });
+      y-=8;
+    },
+    save(filename,title,footer){
+      const N=pages.length;
+      pages.forEach((p,i)=>{ p.push(`${col([47,107,151])} rg 0 ${PH-10} ${PW} 10 re f ${col([156,214,234])} rg 0 ${PH-14} ${PW} 4 re f ${col([156,214,234])} rg 0 0 ${PW} 5 re f`); const f=enc(footer||''); p.push(`BT /F1 8 Tf ${col([120,134,145])} rg ${M} 28 Td (${esc(f)}) Tj ET`); const pg=`Page ${i+1} of ${N}`; p.push(`BT /F1 8 Tf ${col([120,134,145])} rg ${(PW-M-tw(pg,8,false)).toFixed(2)} 28 Td (${pg}) Tj ET`); });
+      let out='%PDF-1.4\n%\xe2\xe3\xcf\xd3\n'; const offs=[];
+      const obj=(n,body)=>{ offs[n]=out.length; out+=n+' 0 obj\n'+body+'\nendobj\n'; };
+      const total=4+2*N+2, infoN=total-1, imgN=total;
+      obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
+      obj(2,'<< /Type /Pages /Count '+N+' /Kids ['+pages.map((_,i)=>(5+2*i)+' 0 R').join(' ')+'] >>');
+      obj(3,'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+      obj(4,'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+      pages.forEach((p,i)=>{
+        const s=p.join('\n');
+        obj(5+2*i,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+PW+' '+PH+'] /Resources << /Font << /F1 3 0 R /F2 4 0 R >>'+(LOGO?' /XObject << /Im1 '+imgN+' 0 R >>':'')+' >> /Contents '+(6+2*i)+' 0 R >>');
+        obj(6+2*i,'<< /Length '+s.length+' >>\nstream\n'+s+'\nendstream');
+      });
+      if(LOGO){ const bin=atob(LOGO.data); obj(imgN,'<< /Type /XObject /Subtype /Image /Width '+LOGO.w+' /Height '+LOGO.h+' /ColorSpace [/Indexed /DeviceRGB '+(LOGO.n-1)+' <'+LOGO.pal+'>] /BitsPerComponent 4 /Length '+bin.length+' >>\nstream\n'+bin+'\nendstream'); } else { obj(imgN,'<< /Type /Metadata >>'); }
+      obj(infoN,'<< /Title ('+esc(enc(title||'Report'))+') /Producer (The Aquila School) >>');
+      const xs=out.length; out+='xref\n0 '+(total+1)+'\n0000000000 65535 f \n';
+      for(let n=1;n<=total;n++) out+=String(offs[n]).padStart(10,'0')+' 00000 n \n';
+      out+='trailer\n<< /Size '+(total+1)+' /Root 1 0 R /Info '+infoN+' 0 R >>\nstartxref\n'+xs+'\n%%EOF';
+      const bytes=new Uint8Array(out.length); for(let i=0;i<out.length;i++) bytes[i]=out.charCodeAt(i)&255;
+      const blob=new Blob([bytes],{type:'application/pdf'}), url=URL.createObjectURL(blob), a=document.createElement('a');
+      a.href=url; a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },1500);
+      return bytes;
+    },
+    _debug:{enc,wrap,tw}
+  };
+  newPage();
+  return api;
+}
+
+</script>
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const $$=s=>Array.from(document.querySelectorAll(s));
+function fmt(x,d=2){ if(Math.abs(x)<1e-9) x=0; let s=Number(x.toFixed(d)).toString(); return s.replace('-','−'); }
+function sgn(x,d=2){ return (x>0?'+':'')+fmt(x,d); }
+function parseNum(s){ s=String(s).trim().replace('−','-').replace(',','.'); if(s===''||isNaN(Number(s))) return NaN; return Number(s); }
+function near(x,a){ return Math.abs(x-a) <= Math.max(0.011, Math.abs(a)*0.01); }
+const COL={A:'#2F6FA3',B:'#E8692B',T:'#4a5560'};
+const wOf=m=>1.3+0.9*Math.sqrt(m);
+
+/* ---------- progress tracking (for the report) ---------- */
+const stats={t0:Date.now(),lab:{same:0,opp:0,rest:0,exp:0,stick:0,bounce:0,pc:0,pok:0},calc:{},hist:[]};
+/* ---------- tabs ---------- */
+function showTab(n){
+  $$('.tabs button').forEach((b,i)=>b.setAttribute('aria-selected',String(i+1===n)));
+  $$('section[role=tabpanel]').forEach((s,i)=>s.classList.toggle('on',i+1===n));
+  if(n===1) drawExplore(); if(n===2){ resizeLab(); } if(n===5) renderReport();
+}
+$$('.tabs button').forEach((b,i)=>b.addEventListener('click',()=>showTab(i+1)));
+$$('.tabs button').forEach((b,i,all)=>b.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowLeft'){ const j=(i+(e.key==='ArrowRight'?1:all.length-1))%all.length; all[j].focus(); showTab(j+1); }
+}));
+
+/* ---------- drawing ---------- */
+const STYLE={x:'car',lab:'car'};
+function setup(cv,h){
+  const dpr=window.devicePixelRatio||1, W=cv.clientWidth||600;
+  cv.width=Math.round(W*dpr); cv.height=Math.round(h*dpr);
+  const c=cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0); return {c,W,H:h};
+}
+function rrect(c,x,y,w,h,r){ r=Math.min(r,w/2,h/2); c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+function vehH(wPx){ return Math.max(44,Math.min(100,wPx*0.42)); }
+function drawVehicle(c,cx,ground,wPx,color,style,face,label){
+  const hPx=vehH(wPx);
+  if(style==='block'){
+    const bh=Math.max(44,Math.min(100,wPx*0.8));
+    c.fillStyle=color; rrect(c,cx-wPx/2,ground-bh,wPx,bh,6); c.fill();
+    c.strokeStyle='rgba(0,0,0,.25)'; c.lineWidth=2; c.stroke();
+    c.fillStyle='rgba(255,255,255,.25)'; rrect(c,cx-wPx/2+4,ground-bh+4,wPx-8,bh*0.28,4); c.fill();
+    c.fillStyle='#fff'; c.font='bold 14px Lato,Segoe UI,Arial'; c.textAlign='center'; c.textBaseline='middle'; c.fillText(label,cx,ground-bh/2+4);
+    return bh;
+  }
+  const wr=hPx*0.2, bodyH=hPx*0.42, by=ground-wr*1.1-bodyH;
+  c.fillStyle=color; rrect(c,cx-wPx/2,by,wPx,bodyH,8); c.fill();
+  // cabin
+  const cw=wPx*0.52, ch=hPx*0.36, cx0=cx-cw/2+(face>=0?-wPx*0.03:wPx*0.03);
+  c.beginPath(); c.moveTo(cx0,by); c.lineTo(cx0+cw*0.14,by-ch); c.lineTo(cx0+cw*0.86,by-ch); c.lineTo(cx0+cw,by); c.closePath(); c.fill();
+  c.fillStyle='rgba(255,255,255,.75)';
+  c.beginPath(); c.moveTo(cx0+cw*0.12,by-1); c.lineTo(cx0+cw*0.24,by-ch+4); c.lineTo(cx0+cw*0.76,by-ch+4); c.lineTo(cx0+cw*0.88,by-1); c.closePath(); c.fill();
+  c.fillStyle='#fff'; c.font='bold 13px Lato,Segoe UI,Arial'; c.textAlign='center'; c.textBaseline='middle'; c.fillText(label,cx,by+bodyH/2+1);
+  // headlight
+  c.fillStyle='#ffe082'; const hx=face>=0?cx+wPx/2-6:cx-wPx/2+6; c.beginPath(); c.arc(hx,by+bodyH*0.35,4,0,7); c.fill();
+  // wheels
+  for(const wx of [cx-wPx*0.3,cx+wPx*0.3]){ c.fillStyle='#263238'; c.beginPath(); c.arc(wx,ground-wr,wr,0,7); c.fill(); c.fillStyle='#b0bec5'; c.beginPath(); c.arc(wx,ground-wr,wr*0.45,0,7); c.fill(); }
+  return hPx;
+}
+function arrow(c,x,y,len,color,txt){
+  if(Math.abs(len)<1) return;
+  const d=Math.sign(len), e=x+len, hh=7;
+  c.strokeStyle=color; c.fillStyle=color; c.lineWidth=5; c.lineCap='round';
+  c.beginPath(); c.moveTo(x,y); c.lineTo(e-d*hh,y); c.stroke();
+  c.beginPath(); c.moveTo(e,y); c.lineTo(e-d*hh*1.6,y-hh); c.lineTo(e-d*hh*1.6,y+hh); c.closePath(); c.fill();
+  if(txt){ c.font='bold 12px Lato,Segoe UI,Arial'; c.textAlign='center'; c.textBaseline='bottom'; c.fillText(txt,x+len/2,y-9); }
+}
+function drawRoad(c,W,H,L,ground){
+  const sx=W/L;
+  c.fillStyle='#eaf4fb'; c.fillRect(0,0,W,H);
+  c.fillStyle='#cfe3f1'; c.fillRect(0,0,W,ground*0.35);
+  c.fillStyle='#5d6b74'; c.fillRect(0,ground,W,H-ground);
+  c.fillStyle='#fff'; c.font='11px Lato,Segoe UI,Arial'; c.textAlign='center'; c.textBaseline='top';
+  for(let m=0;m<=L;m+=2){ const x=m*sx; c.fillRect(x-0.5,ground+2,1.5,m%10===0?9:5); if(m%4===0&&m>0&&m<L) c.fillText(m+' m',x,ground+13); }
+}
+const PK=4.5; // px per kg m/s for momentum arrows
+
+/* ---------- momentum bars (diverging) ---------- */
+function barsHTML(rows,max){
+  return rows.map(r=>{
+    const w=Math.min(50,Math.abs(r.p)/max*50), left=r.p>=0?50:50-w;
+    return `<div>${r.name}<br><small style="color:var(--muted)">${sgn(r.p,1)} kg m/s</small></div><div class="bar"><i style="left:${left}%;width:${w}%;background:${r.color}"></i></div>`;
+  }).join('');
+}
+
+/* ================= 1. EXPLORE ================= */
+const X={m:2,v:3,x:3,face:1};
+const chal=[
+  {t:'Make the momentum +20 kg m/s.',ok:(m,v)=>Math.abs(m*v-20)<0.01},
+  {t:'Make the momentum −15 kg m/s (moving left).',ok:(m,v)=>Math.abs(m*v+15)<0.01},
+  {t:'Make a heavy object (mass 6 kg or more) with momentum +12 kg m/s.',ok:(m,v)=>m>=6&&Math.abs(m*v-12)<0.01},
+  {t:'Make a light object (mass 1 kg or less) with momentum +6 kg m/s.',ok:(m,v)=>m<=1&&Math.abs(m*v-6)<0.01},
+  {t:'Make an object with a mass of 8 kg that has zero momentum.',ok:(m,v)=>m===8&&Math.abs(m*v)<0.01},
+];
+const chalDone=chal.map(()=>false);
+function renderChal(){
+  $('#chal').innerHTML=chal.map((c,i)=>`<li class="${chalDone[i]?'done':''}"><span class="tick">${chalDone[i]?'✓':''}</span><span>${c.t}</span></li>`).join('');
+}
+function updateExplore(){
+  X.m=+$('#xm').value; X.v=+$('#xv').value;
+  $('#xmv').textContent=fmt(X.m,1)+' kg'; $('#xvv').textContent=sgn(X.v,1)+' m/s';
+  const p=X.m*X.v;
+  $('#xeq').innerHTML=`p = m × v = ${fmt(X.m,1)} × ${X.v<0?'('+fmt(X.v,1)+')':fmt(X.v,1)} = ${fmt(p,1)} kg m/s<small>${p>0?'Momentum to the right':p<0?'Momentum to the left':'No momentum: the object is not moving'}</small>`;
+  $('#xbars').innerHTML=barsHTML([{name:'Momentum',p,color:p>=0?COL.A:COL.B}],80);
+  chal.forEach((c,i)=>{ if(!chalDone[i]&&c.ok(X.m,X.v)){ chalDone[i]=true; } });
+  renderChal();
+}
+function drawExplore(){
+  const cv=$('#cvX'); if(!cv.clientWidth) return;
+  const {c,W,H}=setup(cv,200), L=24, sx=W/L, ground=H-64;
+  drawRoad(c,W,H,L,ground);
+  const w=wOf(X.m), wp=w*sx;
+  if(Math.abs(X.v)>0.05) X.face=Math.sign(X.v);
+  const h=drawVehicle(c,X.x*sx,ground,wp,COL.A,STYLE.x,X.face,fmt(X.m,1)+' kg');
+  const p=X.m*X.v;
+  arrow(c,X.x*sx,ground-h-24,Math.max(-W*0.45,Math.min(W*0.45,p*PK)),p>=0?COL.A:COL.B,'p = '+sgn(p,1));
+  c.fillStyle='#fff'; c.font='bold 12px Lato,Segoe UI,Arial'; c.textAlign='center'; c.textBaseline='top';
+  c.fillText('v = '+sgn(X.v,1)+' m/s',X.x*sx,ground+38);
+}
+let lastT=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
+  if($('#p1').classList.contains('on')){
+    X.x+=X.v*dt; const half=wOf(X.m)/2;
+    if(X.x>24+half) X.x=-half; if(X.x<-half) X.x=24+half;
+    drawExplore();
+  }
+  if($('#p2').classList.contains('on')){ labFrame(dt); }
+  requestAnimationFrame(frame);
+}
+$('#xm').addEventListener('input',updateExplore); $('#xv').addEventListener('input',updateExplore);
+
+/* ================= 2. LAB ================= */
+let L=24;
+const lab={mA:3,vA:4,mB:3,vB:0,u:3,mode:'stick',speed:1,objs:[],t:0,running:false,event:false,done:false,tEvent:0,stuck:false,noCollision:false,askDone:false};
+function outcome(){
+  const {mA,vA,mB,vB,u,mode}=lab;
+  if(mode==='stick'){ const v=(mA*vA+mB*vB)/(mA+mB); return [v,v]; }
+  if(mode==='bounce'){ return [((mA-mB)*vA+2*mB*vB)/(mA+mB), ((mB-mA)*vB+2*mA*vA)/(mA+mB)]; }
+  return [-u, mA*u/mB];
+}
+function initV(){ return lab.mode==='explode'?[0,0]:[lab.vA,lab.vB]; }
+function labReset(){
+  L=window.innerWidth<700?16:24;
+  const [vA,vB]=initV(), wA=wOf(lab.mA), wB=wOf(lab.mB);
+  let xA,xB;
+  if(lab.mode==='explode'){ xA=L/2-wA/2-0.35; xB=L/2+wB/2+0.35; }
+  else if(vA-vB>0.001){
+    const xc=L/2; let T=2.5;
+    if(vA>0) T=Math.min(T,(xc-wA-0.6)/vA);
+    if(vB<0) T=Math.min(T,(L-0.6-xc-wB)/(-vB));
+    if(vA<0) T=Math.min(T,(L-0.6-xc)/(-vA));
+    if(vB>0) T=Math.min(T,(xc-0.6)/vB);
+    T=Math.max(T,0.3);
+    xA=xc-wA/2-vA*T; xB=xc+wB/2-vB*T;
+  } else { xA=L*0.2; xB=L*0.7; }
+  lab.noCollision=(lab.mode!=='explode')&&!(vA-vB>0.001);
+  lab.objs=[{x:xA,v:vA,m:lab.mA,w:wA,c:COL.A,n:'A',face:1},{x:xB,v:vB,m:lab.mB,w:wB,c:COL.B,n:'B',face:-1}];
+  lab.t=0; lab.running=false; lab.event=false; lab.done=false; lab.stuck=false; lab.tEvent=0;
+  lab.objs.forEach(o=>{ if(Math.abs(o.v)>0.05) o.face=Math.sign(o.v); });
+  setStatus(lab.noCollision?'With these settings A never catches B, so there will be no collision. Change a velocity so that A is moving towards B.':'Press Run to start.');
+  renderTable(); renderBars(); labDraw();
+  $('#run').disabled=false; $('#pause').textContent='Pause';
+}
+function setStatus(t){ $('#labStatus').textContent=t; }
+function labFrame(dt){
+  if(lab.running){
+    let rem=dt*lab.speed; const h=1/240;
+    while(rem>1e-9){ const d=Math.min(h,rem); step(d); rem-=d; if(!lab.running) break; }
+  }
+  labDraw();
+}
+function step(dt){
+  const [A,B]=lab.objs; lab.t+=dt;
+  if(lab.mode==='explode'){
+    if(!lab.event && lab.t>=0.7){ const [a,b]=outcome(); A.v=a; B.v=b; lab.event=true; lab.tEvent=lab.t; A.face=-1; B.face=1; stats.lab.exp++; renderTable(); renderBars(); setStatus('The spring pushed the trolleys apart.'); }
+  }
+  A.x+=A.v*dt; B.x+=B.v*dt;
+  if(!lab.event && lab.mode!=='explode'){
+    const ov=(A.x+A.w/2)-(B.x-B.w/2);
+    if(ov>=0 && A.v-B.v>0){
+      const back=ov/(A.v-B.v); A.x-=A.v*back; B.x-=B.v*back;
+      const kind=lab.vA*lab.vB>0?'same':lab.vA*lab.vB<0?'opp':'rest'; stats.lab[kind]++; stats.lab[lab.mode]++;
+      const [a,b]=outcome(); A.v=a; B.v=b; lab.event=true; lab.tEvent=lab.t; lab.stuck=(lab.mode==='stick');
+      A.x+=A.v*back; B.x+=B.v*back;
+      if(lab.stuck){ A.x=B.x-(A.w+B.w)/2; }
+      [A,B].forEach(o=>{ if(Math.abs(o.v)>0.05) o.face=Math.sign(o.v); });
+      renderTable(); renderBars();
+      setStatus(lab.mode==='stick'?'The vehicles stuck together.':'The vehicles bounced apart.');
+    }
+  }
+  const out=o=>(o.x-o.w/2<0)||(o.x+o.w/2>L);
+  if(lab.event && (out(A)||out(B)||lab.t-lab.tEvent>6)){ finish('Finished. Look at the table to compare the total momentum before and after.'); }
+  if(!lab.event && (out(A)||out(B)||lab.t>25)){ finish(lab.noCollision?'No collision happened, so the momentum did not change.':'Finished.'); }
+}
+function finish(msg){ lab.running=false; lab.done=true; setStatus(msg); $('#pause').textContent='Pause'; }
+function labDraw(){
+  const cv=$('#cvL'); if(!cv.clientWidth) return;
+  const {c,W,H}=setup(cv,250), sx=W/L, ground=H-64;
+  drawRoad(c,W,H,L,ground);
+  const [A,B]=lab.objs; if(!A) return;
+  // spring before explosion
+  if(lab.mode==='explode'&&!lab.event){
+    const x0=(A.x+A.w/2)*sx, x1=(B.x-B.w/2)*sx, y=ground-26; c.strokeStyle='#37474f'; c.lineWidth=3; c.beginPath(); c.moveTo(x0,y);
+    const n=8; for(let i=1;i<=n;i++){ c.lineTo(x0+(x1-x0)*(i-0.5)/n,y+(i%2?-9:9)); } c.lineTo(x1,y); c.stroke();
+  }
+  const hA=drawVehicle(c,A.x*sx,ground,A.w*sx,A.c,STYLE.lab,A.face,fmt(A.m,1)+' kg');
+  const hB=drawVehicle(c,B.x*sx,ground,B.w*sx,B.c,STYLE.lab,B.face,fmt(B.m,1)+' kg');
+  c.fillStyle='#fff'; c.font='bold 12px Lato,Segoe UI,Arial'; c.textAlign='center'; c.textBaseline='top';
+  // arrows and labels
+  const ay=ground-Math.max(hA,hB)-30;
+  if(lab.stuck){
+    const p=A.m*A.v+B.m*B.v, cx=(A.x+B.x)/2*sx;
+    arrow(c,cx,ay,Math.max(-W*0.4,Math.min(W*0.4,p*PK)),COL.T,'A + B: p = '+sgn(p,1));
+    c.fillStyle='#fff'; c.fillText('A + B   v = '+sgn(A.v,2)+' m/s',cx,ground+38);
+  } else {
+    [A,B].forEach((o,i)=>{ const p=o.m*o.v; arrow(c,o.x*sx,ay-(i?0:0),Math.max(-W*0.4,Math.min(W*0.4,p*PK)),o.c,o.n+': '+sgn(p,1)); c.fillStyle='#fff'; c.fillText(o.n+'  v = '+sgn(o.v,2)+' m/s',o.x*sx,ground+38); });
+  }
+  c.fillStyle='#37474f'; c.font='12px Lato,Segoe UI,Arial'; c.textAlign='left'; c.textBaseline='top';
+  c.fillText('Time: '+lab.t.toFixed(1)+' s',8,6);
+}
+function resizeLab(){ labDraw(); }
+function momentaBefore(){ const [vA,vB]=initV(); return [lab.mA*vA, lab.mB*vB]; }
+function renderTable(){
+  const [vA,vB]=initV(), pA=lab.mA*vA, pB=lab.mB*vB;
+  const known=lab.event, A=lab.objs[0], B=lab.objs[1];
+  const aV=known?A.v:null, bV=known?B.v:null;
+  const aP=known?lab.mA*A.v:null, bP=known?lab.mB*B.v:null;
+  const q='?';
+  $('#labTbl').innerHTML=`<tr><th class="l"></th><th>mass (kg)</th><th>velocity before (m/s)</th><th>momentum before (kg m/s)</th><th>velocity after (m/s)</th><th>momentum after (kg m/s)</th></tr>
+  <tr><td class="l cA">A</td><td>${fmt(lab.mA,1)}</td><td>${sgn(vA,2)}</td><td>${sgn(pA,2)}</td><td>${known?sgn(aV,2):q}</td><td>${known?sgn(aP,2):q}</td></tr>
+  <tr><td class="l cB">B</td><td>${fmt(lab.mB,1)}</td><td>${sgn(vB,2)}</td><td>${sgn(pB,2)}</td><td>${known?sgn(bV,2):q}</td><td>${known?sgn(bP,2):q}</td></tr>
+  <tr class="tot"><td class="l">Total</td><td>${fmt(lab.mA+lab.mB,1)}</td><td></td><td>${sgn(pA+pB,2)}</td><td></td><td>${known?sgn(aP+bP,2):q}</td></tr>`;
+  const cl=$('#consLine');
+  if(known){ const ok=Math.abs((aP+bP)-(pA+pB))<0.02; cl.className='status '+(ok?'ok':'bad'); cl.textContent=ok?'Total momentum before = total momentum after. Momentum is conserved ✓':'Something is wrong.'; }
+  else { cl.className='status'; cl.textContent='Run the event to find the momentum after.'; }
+}
+function renderBars(){
+  const [vA,vB]=initV(), pA=lab.mA*vA, pB=lab.mB*vB, rows=[
+    {name:'Before: A',p:pA,color:COL.A},{name:'Before: B',p:pB,color:COL.B},{name:'Before: total',p:pA+pB,color:COL.T}];
+  if(lab.event){ const A=lab.objs[0],B=lab.objs[1]; rows.push({name:'After: A',p:lab.mA*A.v,color:COL.A},{name:'After: B',p:lab.mB*B.v,color:COL.B},{name:'After: total',p:lab.mA*A.v+lab.mB*B.v,color:COL.T}); }
+  $('#lbars').innerHTML=barsHTML(rows,60);
+}
+/* prediction */
+function askCfg(){
+  const [a,b]=outcome(), [pA,pB]=momentaBefore();
+  if(lab.mode==='stick') return {lbl:'Predict the velocity of the two vehicles after they stick together.',unit:'m/s',ans:a};
+  if(lab.mode==='bounce') return {lbl:'Predict the total momentum of A and B after they bounce apart.',unit:'kg m/s',ans:pA+pB};
+  return {lbl:'Predict the velocity of B after the explosion (right is positive).',unit:'m/s',ans:b};
+}
+function renderAsk(){
+  const k=askCfg(); $('#askLbl').textContent=k.lbl; $('#askUnit').textContent=k.unit; $('#askIn').value=''; $('#askFb').innerHTML='';
+  $('#workBox').style.display='none'; $('#workBtn').textContent='Show working';
+  const n=$('#extNote');
+  if(lab.mode==='bounce'){ n.style.display='block'; n.innerHTML='<b>Extension:</b> to find each velocity after a bounce you also need to know that kinetic energy is conserved. For now, use the conservation of momentum to find the total.'; }
+  else n.style.display='none';
+}
+function workSteps(){
+  const [vA,vB]=initV(), {mA,mB}=lab, pA=mA*vA, pB=mB*vB;
+  const par=x=>x<0?'('+fmt(x,2)+')':fmt(x,2);
+  if(lab.mode==='stick'){
+    const p=pA+pB, m=mA+mB;
+    return [`Total momentum before = (${fmt(mA,1)} × ${par(vA)}) + (${fmt(mB,1)} × ${par(vB)}) = ${fmt(pA,2)} + ${par(pB)} = <b>${fmt(p,2)} kg m/s</b>`,
+            `The vehicles stick together, so the total mass = ${fmt(mA,1)} + ${fmt(mB,1)} = <b>${fmt(m,1)} kg</b>`,
+            `Momentum after = momentum before, so v = p ÷ m = ${fmt(p,2)} ÷ ${fmt(m,1)} = <b>${fmt(p/m,2)} m/s</b>${p/m>0?' (to the right)':p/m<0?' (to the left)':' (they stop)'}`];
+  }
+  if(lab.mode==='bounce'){
+    return [`Total momentum before = (${fmt(mA,1)} × ${par(vA)}) + (${fmt(mB,1)} × ${par(vB)}) = <b>${fmt(pA+pB,2)} kg m/s</b>`,
+            `No outside force acts, so total momentum after = total momentum before = <b>${fmt(pA+pB,2)} kg m/s</b>`];
+  }
+  const u=lab.u, vb=mA*u/mB;
+  return [`Both trolleys start at rest, so the total momentum before = <b>0</b>`,
+          `Momentum of A after = ${fmt(mA,1)} × (−${fmt(u,1)}) = <b>${fmt(-mA*u,2)} kg m/s</b>`,
+          `The total after must also be 0, so B has <b>${fmt(mA*u,2)} kg m/s</b>`,
+          `v = p ÷ m = ${fmt(mA*u,2)} ÷ ${fmt(mB,1)} = <b>${sgn(vb,2)} m/s</b>`];
+}
+$('#askBtn').addEventListener('click',()=>{
+  const k=askCfg(), x=parseNum($('#askIn').value), fb=$('#askFb');
+  if(isNaN(x)){ fb.innerHTML='<div class="fb info">Type a number first.</div>'; return; }
+  stats.lab.pc++; if(near(x,k.ans)) stats.lab.pok++;
+  if(near(x,k.ans)) fb.innerHTML=`<div class="fb ok">Correct: ${fmt(k.ans,2)} ${k.unit}. Press Run to see it happen.</div>`;
+  else fb.innerHTML=`<div class="fb bad">Not quite. Check the signs and the units, then try again, or press Show working.</div>`;
+});
+$('#workBtn').addEventListener('click',()=>{
+  const b=$('#workBox'), show=b.style.display==='none';
+  b.style.display=show?'block':'none'; $('#workBtn').textContent=show?'Hide working':'Show working';
+  if(show) b.innerHTML='<ol>'+workSteps().map(s=>`<li>${s}</li>`).join('')+'</ol>';
+});
+/* controls */
+function readLab(){
+  lab.mA=+$('#mA').value; lab.vA=+$('#vA').value; lab.mB=+$('#mB').value; lab.vB=+$('#vB').value; lab.u=+$('#uu').value; lab.speed=+$('#spd').value;
+  const umax=Math.min(6,Math.floor(10*lab.mB/lab.mA*2)/2); const uu=$('#uu'); uu.max=Math.max(0.5,umax); if(lab.u>+uu.max){ lab.u=+uu.max; uu.value=lab.u; }
+  $('#mAv').textContent=fmt(lab.mA,1)+' kg'; $('#vAv').textContent=sgn(lab.vA,1)+' m/s';
+  $('#mBv').textContent=fmt(lab.mB,1)+' kg'; $('#vBv').textContent=sgn(lab.vB,1)+' m/s';
+  $('#uuv').textContent=fmt(lab.u,1)+' m/s'; $('#spdv').textContent=lab.speed+'×';
+}
+function labChanged(){ readLab(); labReset(); renderAsk(); }
+['mA','vA','mB','vB','uu'].forEach(id=>$('#'+id).addEventListener('input',labChanged));
+$('#spd').addEventListener('input',readLab);
+function setMode(m){
+  lab.mode=m; $$('#modeSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));
+  const ex=m==='explode'; $('#vAwrap').style.display=ex?'none':''; $('#vBwrap').style.display=ex?'none':''; $('#uwrap').style.display=ex?'':'none';
+  labChanged();
+}
+$$('#modeSeg button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+$$('button[data-style]').forEach(b=>b.addEventListener('click',()=>{
+  const sc=b.dataset.scope; STYLE[sc]=b.dataset.style;
+  $$(`button[data-scope="${sc}"]`).forEach(x=>x.setAttribute('aria-pressed',String(x===b))); drawExplore(); labDraw();
+}));
+$('#run').addEventListener('click',()=>{ if(lab.done||lab.event) labReset(); lab.running=true; setStatus(lab.noCollision?'Running… A is not moving towards B.':'Running…'); });
+$('#pause').addEventListener('click',()=>{ if(lab.done) return; lab.running=!lab.running; $('#pause').textContent=lab.running?'Pause':'Resume'; });
+$('#reset').addEventListener('click',labReset);
+const PRESETS={
+  same1:{mode:'stick',mA:3,vA:5,mB:2,vB:1}, same2:{mode:'stick',mA:3,vA:4,mB:3,vB:0},
+  opp1:{mode:'stick',mA:2,vA:4,mB:3,vB:-2}, opp2:{mode:'stick',mA:3,vA:3,mB:3,vB:-3},
+  bounce:{mode:'bounce',mA:2,vA:3,mB:2,vB:-1}, exp1:{mode:'explode',mA:2,mB:2,u:3}, exp2:{mode:'explode',mA:3,mB:1,u:2}
+};
+function loadLab(p){
+  $('#mA').value=p.mA; $('#mB').value=p.mB; if(p.vA!==undefined) $('#vA').value=p.vA; if(p.vB!==undefined) $('#vB').value=p.vB; if(p.u!==undefined) $('#uu').value=p.u;
+  readLab(); setMode(p.mode);
+  if(p.u!==undefined){ $('#uu').value=p.u; labChanged(); }
+}
+$$('button[data-preset]').forEach(b=>b.addEventListener('click',()=>loadLab(PRESETS[b.dataset.preset])));
+
+/* ================= 3. CALCULATE ================= */
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[rnd(0,a.length-1)];
+const one=x=>Math.abs(x*10-Math.round(x*10))<1e-9;
+const OBJS=[['trolley',[0.5,1,1.5,2,2.5,3,4],[1,2,3,4,5]],['cyclist',[60,70,80,90],[4,5,6,8,10]],['car',[800,1000,1200,1500],[10,15,20,25,30]],['lorry',[5000,8000,10000,20000],[5,10,15,20]]];
+function gMomentum(){ const [o,ms,vs]=pick(OBJS), m=pick(ms), v=pick(vs), p=m*v;
+  return {text:`A ${o} has a mass of ${m} kg and a velocity of ${v} m/s. Calculate its momentum.`,unit:'kg m/s',ans:p,hint:'Use p = m × v.',steps:[`p = m × v`,`p = ${m} × ${v} = <b>${fmt(p,2)} kg m/s</b>`]}; }
+function gVelocity(){ const [o,ms,vs]=pick(OBJS), m=pick(ms), v=pick(vs), p=m*v;
+  return {text:`A ${o} of mass ${m} kg has a momentum of ${p} kg m/s. Calculate its velocity.`,unit:'m/s',ans:v,hint:'Rearrange p = m × v to get v = p ÷ m.',steps:[`v = p ÷ m`,`v = ${p} ÷ ${m} = <b>${fmt(v,2)} m/s</b>`]}; }
+function gMass(){ const [o,ms,vs]=pick(OBJS), m=pick(ms), v=pick(vs), p=m*v;
+  return {text:`A ${o} moving at ${v} m/s has a momentum of ${p} kg m/s. Calculate its mass.`,unit:'kg',ans:m,hint:'Rearrange p = m × v to get m = p ÷ v.',steps:[`m = p ÷ v`,`m = ${p} ÷ ${v} = <b>${fmt(m,2)} kg</b>`]}; }
+function gStickRest(){ for(;;){ const mA=rnd(1,6),mB=rnd(1,6),vA=rnd(2,8), v=mA*vA/(mA+mB); if(one(v)&&v>0)
+  return {text:`Trolley A (${mA} kg) moves at ${vA} m/s towards a stationary trolley B (${mB} kg). They stick together. Calculate their velocity after the collision.`,unit:'m/s',ans:v,hint:'Total momentum before = total momentum after. After the collision the mass is mA + mB.',
+   steps:[`Momentum before = ${mA} × ${vA} + ${mB} × 0 = <b>${mA*vA} kg m/s</b>`,`Mass after = ${mA} + ${mB} = <b>${mA+mB} kg</b>`,`v = p ÷ m = ${mA*vA} ÷ ${mA+mB} = <b>${fmt(v,2)} m/s</b>`],
+   lab:{mode:'stick',mA,vA,mB,vB:0}}; } }
+function gStickSame(){ for(;;){ const mA=rnd(1,6),mB=rnd(1,6),vA=rnd(3,8),vB=rnd(1,vA-1), p=mA*vA+mB*vB, v=p/(mA+mB); if(one(v))
+  return {text:`Trolley A (${mA} kg) moves right at ${vA} m/s. It catches up with trolley B (${mB} kg) moving right at ${vB} m/s. They stick together. Calculate their velocity after the collision.`,unit:'m/s',ans:v,hint:'Add the momenta of both trolleys. Both are moving in the same direction, so both are positive.',
+   steps:[`Momentum before = ${mA} × ${vA} + ${mB} × ${vB} = ${mA*vA} + ${mB*vB} = <b>${p} kg m/s</b>`,`Mass after = ${mA} + ${mB} = <b>${mA+mB} kg</b>`,`v = p ÷ m = ${p} ÷ ${mA+mB} = <b>${fmt(v,2)} m/s</b>`],
+   lab:{mode:'stick',mA,vA,mB,vB}}; } }
+function gStickOpp(){ for(;;){ const mA=rnd(1,6),mB=rnd(1,6),vA=rnd(2,8),vB=rnd(2,8), p=mA*vA-mB*vB, v=p/(mA+mB); if(one(v)&&Math.abs(vB)<=8)
+  return {text:`Trolley A (${mA} kg) moves right at ${vA} m/s. Trolley B (${mB} kg) moves left at ${vB} m/s. They collide head-on and stick together. Calculate their velocity after the collision. Take right as positive.`,unit:'m/s',ans:v,hint:'Left is negative, so the momentum of B is negative. Add the momenta with their signs.',
+   steps:[`Momentum before = ${mA} × ${vA} + ${mB} × (−${vB}) = ${mA*vA} − ${mB*vB} = <b>${p} kg m/s</b>`,`Mass after = ${mA} + ${mB} = <b>${mA+mB} kg</b>`,`v = p ÷ m = ${p} ÷ ${mA+mB} = <b>${fmt(v,2)} m/s</b>${v>0?' (to the right)':v<0?' (to the left)':' (they stop)'}`],
+   lab:{mode:'stick',mA,vA,mB,vB:-vB}}; } }
+function gExplode(){ for(;;){ const mA=rnd(1,6),mB=rnd(1,6),u=rnd(1,6), v=mA*u/mB; if(one(v)&&v<=10&&mA!==mB)
+  return {text:`Trolleys A (${mA} kg) and B (${mB} kg) are at rest together. A spring pushes them apart. A moves left at ${u} m/s. Calculate the velocity of B. Take right as positive.`,unit:'m/s',ans:v,hint:'The total momentum before is zero, so the total momentum after is also zero. The momentum of B must be equal and opposite to the momentum of A.',
+   steps:[`Momentum of A = ${mA} × (−${u}) = <b>${-mA*u} kg m/s</b>`,`Total momentum after = 0, so the momentum of B = <b>+${mA*u} kg m/s</b>`,`v = p ÷ m = ${mA*u} ÷ ${mB} = <b>+${fmt(v,2)} m/s</b>`],
+   lab:{mode:'explode',mA,mB,u}}; } }
+function gForce(){ for(;;){ const [o,m,v,t]=pick([['ball',0.5,12,0.1],['ball',0.4,15,0.2],['football',0.45,20,0.05],['crash dummy',60,15,0.5],['crash dummy',75,20,0.4],['car',1000,10,2],['hockey puck',0.16,25,0.02]]), F=m*v/t;
+  return {text:`A ${o} of mass ${m} kg moving at ${v} m/s is brought to rest in ${t} s. Calculate the average force needed to stop it.`,unit:'N',ans:F,hint:'First find the change in momentum (mass × velocity). Then use F = Δp ÷ t.',
+   steps:[`Change in momentum = ${m} × ${v} = <b>${fmt(m*v,2)} kg m/s</b>`,`F = Δp ÷ t = ${fmt(m*v,2)} ÷ ${t} = <b>${fmt(F,2)} N</b>`]}; } }
+const TYPES=[
+  {k:'mom',n:'Momentum',g:gMomentum,eq:'p = m × v   (momentum = mass × velocity)'},
+  {k:'vel',n:'Find velocity',g:gVelocity,eq:'v = p ÷ m'},
+  {k:'mas',n:'Find mass',g:gMass,eq:'m = p ÷ v'},
+  {k:'sr',n:'Stick: B at rest',g:gStickRest,eq:'total momentum before = total momentum after'},
+  {k:'ss',n:'Stick: same direction',g:gStickSame,eq:'total momentum before = total momentum after'},
+  {k:'so',n:'Stick: opposite directions',g:gStickOpp,eq:'total momentum before = total momentum after  (left is negative)'},
+  {k:'ex',n:'Explosion',g:gExplode,eq:'total momentum before = total momentum after = 0'},
+  {k:'fo',n:'Impact force',g:gForce,eq:'F = Δp ÷ t   (force = change in momentum ÷ time)'}
+];
+let curT=0, curQ=null, tries=0, score=0, total=0, streak=0;
+function renderTypes(){
+  $('#qTypes').innerHTML=TYPES.map((t,i)=>`<button class="chip" data-i="${i}" aria-pressed="${i===curT}" style="${i===curT?'background:var(--blue);color:#fff;border-color:var(--blue)':''}">${t.n}</button>`).join('');
+  $$('#qTypes button').forEach(b=>b.addEventListener('click',()=>{ curT=+b.dataset.i; renderTypes(); newQ(); }));
+}
+function newQ(){
+  const T=TYPES[curT]; curQ=T.g(); tries=0;
+  $('#qEq').innerHTML='<b>Equation:</b> '+T.eq; $('#qText').textContent=curQ.text; $('#qUnit').textContent=curQ.unit; $('#qIn').value='';
+  $('#qFb').innerHTML=''; $('#qWork').style.display='none'; $('#qSteps').textContent='Show working';
+  $('#qLab').style.display=curQ.lab?'':'none';
+}
+function upScore(){ $('#sc').textContent=score; $('#st').textContent=total; $('#sk').textContent=streak; $('#scBar').style.width=(total?100*score/total:0)+'%'; }
+$('#qCheck').addEventListener('click',()=>{
+  const x=parseNum($('#qIn').value), fb=$('#qFb');
+  if(isNaN(x)){ fb.innerHTML='<div class="fb info">Type a number first.</div>'; return; }
+  tries++; total++;
+  { const k=TYPES[curT].k; const o=stats.calc[k]||(stats.calc[k]={a:0,c:0}); o.a++; if(near(x,curQ.ans)) o.c++; }
+  if(near(x,curQ.ans)){ score++; streak++; fb.innerHTML=`<div class="fb ok">Correct: ${fmt(curQ.ans,2)} ${curQ.unit}. Press New question to keep going.</div>`; }
+  else { streak=0; fb.innerHTML=`<div class="fb bad">Not quite${tries>=2?'. Press Show working to see each step.':'. Check the signs and the units, then try again, or press Hint.'}</div>`; }
+  upScore();
+});
+$('#qIn').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#qCheck').click(); });
+$('#askIn').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#askBtn').click(); });
+$('#qHint').addEventListener('click',()=>{ $('#qFb').innerHTML=`<div class="fb info">Hint: ${curQ.hint}</div>`; });
+$('#qSteps').addEventListener('click',()=>{
+  const b=$('#qWork'), show=b.style.display==='none'; b.style.display=show?'block':'none'; $('#qSteps').textContent=show?'Hide working':'Show working';
+  if(show) b.innerHTML='<ol>'+curQ.steps.map(s=>`<li>${s}</li>`).join('')+'</ol>';
+});
+$('#qNew').addEventListener('click',newQ);
+$('#qLab').addEventListener('click',()=>{ if(!curQ.lab) return; showTab(2); loadLab(curQ.lab); });
+
+/* ================= 4. QUIZ ================= */
+const QUIZ=[
+ {q:'What is the unit of momentum?',o:['N','kg m/s','kg m/s²','m/s'],a:1,e:'Momentum = mass (kg) × velocity (m/s), so the unit is kg m/s.'},
+ {q:'A car of mass 1500 kg moves at 20 m/s. Its momentum is…',o:['30 000 kg m/s','75 kg m/s','1520 kg m/s','300 000 kg m/s'],a:0,e:'p = m × v = 1500 × 20 = 30 000 kg m/s.'},
+ {q:'Which object has the greatest momentum?',o:['A 2 kg trolley moving at 10 m/s','A 50 kg skater moving at 0.5 m/s','A 0.1 kg ball moving at 100 m/s','A 5 kg block moving at 4 m/s'],a:1,e:'The momenta are 20, 25, 10 and 20 kg m/s. The skater has the most, even though she is slow.'},
+ {q:'A 2 kg trolley moves to the left at 3 m/s. Taking right as positive, its momentum is…',o:['6 kg m/s','−6 kg m/s','1.5 kg m/s','−1.5 kg m/s'],a:1,e:'Momentum has direction. Left is negative: p = 2 × (−3) = −6 kg m/s.'},
+ {q:'A 3 kg trolley moving at 4 m/s hits a stationary 1 kg trolley. They stick together. Their velocity is…',o:['12 m/s','4 m/s','3 m/s','1 m/s'],a:2,e:'Momentum before = 3 × 4 = 12 kg m/s. Mass after = 4 kg. v = 12 ÷ 4 = 3 m/s.'},
+ {q:'A 2 kg trolley at 5 m/s catches a 3 kg trolley moving the same way at 1 m/s. They stick together. Their velocity is…',o:['2.6 m/s','3 m/s','1.3 m/s','6 m/s'],a:0,e:'Momentum before = 2 × 5 + 3 × 1 = 13 kg m/s. Mass after = 5 kg. v = 13 ÷ 5 = 2.6 m/s. Do not just average the velocities.'},
+ {q:'A 2 kg trolley moving right at 4 m/s hits a 2 kg trolley moving left at 4 m/s. They stick together. Afterwards they…',o:['move right at 4 m/s','move left at 4 m/s','move right at 8 m/s','stop'],a:3,e:'Momentum before = 8 + (−8) = 0. The total momentum after is 0, so they stop.'},
+ {q:'A 4 kg trolley moving right at 3 m/s hits a 2 kg trolley moving left at 3 m/s. They stick together. Their velocity is…',o:['1 m/s to the left','1 m/s to the right','3 m/s to the right','0 m/s'],a:1,e:'Momentum before = 12 − 6 = 6 kg m/s (right). Mass after = 6 kg. v = 6 ÷ 6 = 1 m/s to the right.'},
+ {q:'Two trolleys at rest push each other apart. The 1 kg trolley moves right at 6 m/s. The 3 kg trolley moves…',o:['2 m/s to the right','18 m/s to the left','2 m/s to the left','6 m/s to the left'],a:2,e:'The momenta are equal and opposite. 1 × 6 = 6 kg m/s to the right, so the 3 kg trolley has 6 kg m/s to the left: v = 6 ÷ 3 = 2 m/s.'},
+ {q:'A 600 kg cannon fires a 12 kg cannon ball at 50 m/s. The cannon recoils at…',o:['0.5 m/s','25 m/s','1 m/s','50 m/s'],a:2,e:'Momentum of the ball = 12 × 50 = 600 kg m/s. The cannon has the same momentum backwards: v = 600 ÷ 600 = 1 m/s.'},
+ {q:'A crash test dummy has a change in momentum of 24 kg m/s in 0.2 s. The average force on it is…',o:['4.8 N','24.2 N','120 N','12 N'],a:2,e:'F = Δp ÷ t = 24 ÷ 0.2 = 120 N.'},
+ {q:'Why does an air bag reduce the force on a driver in a crash?',o:['It reduces the momentum of the driver','It increases the time taken to stop','It makes the car heavier','It decreases the time taken to stop'],a:1,e:'The change in momentum is the same, but a longer stopping time means a smaller force (F = Δp ÷ t).'},
+ {q:'In a closed system, the total momentum before a collision is…',o:['greater than after','less than after','always zero','equal to the total momentum after'],a:3,e:'This is the conservation of momentum: no momentum is gained or lost in a closed system.'}
+];
+let qz={i:0,score:0,order:[],picked:null,miss:[],log:[]};
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function quizStart(){ qz={i:0,score:0,order:QUIZ.map(()=>shuffle([0,1,2,3])),picked:null,miss:[],log:[]}; quizShow(); }
+function quizShow(){
+  const card=$('#quizCard');
+  if(qz.i>=QUIZ.length){
+    if(!qz.saved){ qz.saved=true; stats.hist.push({score:qz.score,log:qz.log.slice()}); }
+    const pct=Math.round(100*qz.score/QUIZ.length);
+    card.innerHTML=`<h2>Quiz complete</h2><div class="score">${qz.score} / ${QUIZ.length} (${pct}%)</div><p class="lead">${pct>=85?'Excellent work. You are ready for exam questions on momentum.':pct>=60?'Good effort. Review the questions you missed below.':'Keep practising. Try the Explore and Collision lab tabs again, then retry.'}</p>`+
+     (qz.miss.length?`<h3>Questions to review</h3><ul>`+qz.miss.map(i=>`<li><b>${QUIZ[i].q}</b><br>${QUIZ[i].e}</li>`).join('')+'</ul>':'')+`<div class="row"><button class="btn" id="qzAgain">Try again</button></div>`;
+    $('#qzAgain').addEventListener('click',quizStart); return;
+  }
+  const Q=QUIZ[qz.i], ord=qz.order[qz.i];
+  card.innerHTML=`<div class="row" style="justify-content:space-between"><b>Question ${qz.i+1} of ${QUIZ.length}</b><span>Score: ${qz.score}</span></div><div class="prog"><i style="width:${100*qz.i/QUIZ.length}%"></i></div>
+   <div class="q">${Q.q}</div><div class="opts">`+ord.map((k,j)=>`<button class="opt" data-k="${k}"><b>${'ABCD'[j]}</b><span>${Q.o[k]}</span></button>`).join('')+`</div><div id="qzFb" aria-live="polite"></div><div class="row"><button class="btn" id="qzNext" style="display:none">${qz.i===QUIZ.length-1?'See my score':'Next question'}</button></div>`;
+  $$('#quizCard .opt').forEach(b=>b.addEventListener('click',()=>{
+    const k=+b.dataset.k, ok=k===Q.a; if(ok) qz.score++; else qz.miss.push(qz.i);
+    qz.log.push({i:qz.i,ok,chosen:Q.o[k]});
+    $$('#quizCard .opt').forEach(x=>{ x.disabled=true; if(+x.dataset.k===Q.a) x.classList.add('right'); });
+    if(!ok) b.classList.add('wrong');
+    $('#qzFb').innerHTML=`<div class="fb ${ok?'ok':'bad'}">${ok?'Correct.':'Not quite.'} ${Q.e}</div>`;
+    $('#qzNext').style.display='';  $('#qzNext').focus();
+  }));
+  $('#qzNext').addEventListener('click',()=>{ qz.i++; quizShow(); });
+}
+
+/* ================= 5. REPORT ================= */
+function repData(){
+  const L=stats.lab, calcTot=Object.values(stats.calc).reduce((a,o)=>({a:a.a+o.a,c:a.c+o.c}),{a:0,c:0});
+  const doneCh=chalDone.filter(Boolean).length;
+  const labItems=[['Ran a collision with both vehicles moving in the same direction',L.same>0],['Ran a head-on collision (opposite directions)',L.opp>0],['Ran an explosion',L.exp>0],['Made at least 2 correct predictions',L.pok>=2]];
+  const labDone=labItems.filter(x=>x[1]).length;
+  const best=stats.hist.length?stats.hist.reduce((a,h)=>h.score>a.score?h:a):null, latest=stats.hist.length?stats.hist[stats.hist.length-1]:null;
+  const qFrac=latest?1:qz.log.length/QUIZ.length;
+  const fr=[doneCh/chal.length,labDone/4,Math.min(1,calcTot.c/6),qFrac];
+  return {L,calcTot,doneCh,labItems,labDone,best,latest,fr,overall:fr.reduce((a,b)=>a+b,0)/4,mins:Math.max(1,Math.round((Date.now()-stats.t0)/60000))};
+}
+function renderReport(){
+  const d=repData(), pct=v=>Math.round(v*100)+'%';
+  const row=(t,f,det)=>`<div style="margin:8px 0"><div class="row" style="justify-content:space-between;margin:0"><b>${t}</b><span>${det} <b style="color:${f>=1?'var(--green)':'var(--orange)'}">${pct(f)}</b></span></div><div class="prog"><i style="width:${f*100}%;background:${f>=1?'var(--green)':'var(--orange)'}"></i></div></div>`;
+  $('#repSummary').innerHTML=`<h3>Overall completion: ${pct(d.overall)}</h3><div class="prog"><i style="width:${d.overall*100}%"></i></div>`+
+    row('1. Explore momentum',d.fr[0],`${d.doneCh} of ${chal.length} challenges`)+
+    row('2. Collision lab',d.fr[1],`${d.labDone} of 4 tasks`)+
+    row('3. Calculate',d.fr[2],`${d.calcTot.c} correct of ${d.calcTot.a} attempts (6 correct needed)`)+
+    row('4. Quiz',d.fr[3],d.latest?`best score ${d.best.score} of ${QUIZ.length}`:`${qz.log.length} of ${QUIZ.length} answered`);
+}
+function buildReport(name,cls){
+  const d=repData(), pdf=MiniPDF(), now=new Date(), pct=v=>Math.round(v*100)+'%', Y=[46,125,50], R=[198,40,40], G=[91,107,118];
+  pdf.h1('Momentum lab: completion report');
+  pdf.text('The Aquila School | IGCSE Physics | Chapter 3: Momentum and forces',{size:10,color:G,after:8});
+  pdf.kv('Student',name); pdf.kv('Class',cls||'Not entered');
+  pdf.kv('Date',now.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+', '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}));
+  pdf.kv('Time on this page',d.mins+' minute'+(d.mins===1?'':'s')+' (since the page was opened)');
+  pdf.gap(4); pdf.bar('Overall completion',d.overall,pct(d.overall));
+  pdf.bar('1. Explore momentum',d.fr[0],d.doneCh+' of '+chal.length); pdf.bar('2. Collision lab',d.fr[1],d.labDone+' of 4');
+  pdf.bar('3. Calculate',d.fr[2],d.calcTot.c+' correct (6 needed)'); pdf.bar('4. Quiz',d.fr[3],d.latest?d.best.score+' of '+QUIZ.length:'not finished');
+  pdf.h2('1. Explore momentum: challenges');
+  pdf.table(['Challenge','Result'],chal.map((c,i)=>({cells:[c.t,chalDone[i]?'Complete':'Not yet'],colors:[null,chalDone[i]?Y:R]})),[7,2]);
+  pdf.h2('2. Collision lab');
+  pdf.table(['Task','Result'],d.labItems.map(x=>({cells:[x[0],x[1]?'Complete':'Not yet'],colors:[null,x[1]?Y:R]})),[7,2]);
+  const L=d.L;
+  pdf.table(['What you ran','Times'],[['Collisions, both moving the same way',L.same],['Collisions, head-on (opposite directions)',L.opp],['Collisions, one object at rest',L.rest],['Explosions',L.exp],['Stick-together collisions',L.stick],['Bounce collisions',L.bounce],['Predictions checked / correct',L.pc+' / '+L.pok]],[7,2]);
+  pdf.h2('3. Calculate');
+  const crow=TYPES.filter(t=>stats.calc[t.k]).map(t=>{ const o=stats.calc[t.k]; return [t.n,o.a,o.c,pct(o.c/o.a)]; });
+  if(crow.length){ crow.push({cells:['Total',d.calcTot.a,d.calcTot.c,pct(d.calcTot.a?d.calcTot.c/d.calcTot.a:0)],colors:null}); pdf.table(['Question type','Attempts','Correct','Accuracy'],crow,[5,2,2,2],{}); }
+  else pdf.text('No calculation questions attempted yet.',{color:G});
+  pdf.h2('4. Quiz');
+  const q=d.latest||{score:qz.log.length?qz.score:0,log:qz.log};
+  if(d.latest){ pdf.kv('Latest score',d.latest.score+' of '+QUIZ.length+' ('+pct(d.latest.score/QUIZ.length)+')'); pdf.kv('Best score',d.best.score+' of '+QUIZ.length); pdf.kv('Attempts completed',String(stats.hist.length)); }
+  else pdf.kv('Status','Not finished: '+qz.log.length+' of '+QUIZ.length+' questions answered');
+  if(q.log.length){
+    pdf.gap(4);
+    pdf.table(['#','Question','Result','Correct answer'],q.log.map(e=>{ const Q=QUIZ[e.i]; return {cells:[e.i+1,Q.q,e.ok?'Correct':'Incorrect',e.ok?'':Q.o[Q.a]],colors:[null,null,e.ok?Y:R,null]}; }),[1,8,2,4]);
+    const miss=q.log.filter(e=>!e.ok);
+    if(miss.length){ pdf.h2('Questions to review'); miss.forEach(e=>{ pdf.text((e.i+1)+'. '+QUIZ[e.i].q,{bold:true,size:9.5,after:1}); pdf.text(QUIZ[e.i].e,{size:9.5,color:G,after:6}); }); }
+  }
+  pdf.gap(6); pdf.text('Made automatically on the student\'s own device from their activity on this page. It is a record of what was completed, not a secure test result.',{size:8,color:G});
+  const safe=(name||'student').replace(/[^A-Za-z0-9 _-]+/g,'').trim().replace(/ +/g,'_')||'student';
+  pdf.save('Momentum_lab_report_'+safe+'.pdf','Momentum lab completion report','The Aquila School | Momentum lab | '+name);
+}
+$('#repBtn').addEventListener('click',()=>{
+  const name=$('#repName').value.trim(), m=$('#repMsg');
+  if(!name){ m.innerHTML='<div class="fb bad">Type your name first so that your teacher knows whose report it is.</div>'; $('#repName').focus(); return; }
+  try{ buildReport(name,$('#repClass').value.trim()); m.innerHTML='<div class="fb ok">Your report has been made. Check your Downloads folder.</div>'; }
+  catch(e){ m.innerHTML='<div class="fb bad">Sorry, the report could not be made: '+e.message+'</div>'; }
+});
+/* ---------- init ---------- */
+window.addEventListener('resize',()=>{ drawExplore(); const nl=window.innerWidth<700?16:24; if(nl!==L&&!lab.running) labReset(); else labDraw(); });
+renderChal(); updateExplore(); readLab(); setMode('stick'); renderTypes(); newQ(); upScore(); quizStart();
+requestAnimationFrame(frame);
+window.__t={lab,step,labReset,outcome,QUIZ,TYPES,loadLab,PRESETS,stats,buildReport,repData,qz:()=>qz,getQ:()=>curQ};
+</script>
+</body>
+</html>
